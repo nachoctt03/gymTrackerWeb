@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pesos Picados</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --surface: #161616;
+      --surface2: #1f1f1f;
+      --border: #2a2a2a;
+      --accent: #e8ff3c;
+      --accent-dim: #c5db22;
+      --text: #f0f0f0;
+      --text-muted: #7a7a7a;
+      --red: #ff4d4d;
+      --green: #3cffa0;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── SCREENS ── */
+    .screen { display: none; }
+    .screen.active { display: flex; }
+
+    /* ── AUTH SCREEN ── */
+    #auth-screen {
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #auth-screen::before {
+      content: 'PP';
+      position: absolute;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(200px, 40vw, 500px);
+      color: rgba(232, 255, 60, 0.03);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      user-select: none;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .auth-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 420px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .auth-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 48px;
+      color: var(--accent);
+      letter-spacing: 2px;
+      margin-bottom: 4px;
+    }
+
+    .auth-subtitle {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 4px;
+      margin-bottom: 28px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all .2s;
+    }
+
+    .tab.active {
+      background: var(--accent);
+      color: #0d0d0d;
+    }
+
+    /* ── FORMS ── */
+    .form-group { margin-bottom: 16px; }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 6px;
+    }
+
+    input, textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--accent);
+    }
+
+    textarea { resize: vertical; min-height: 70px; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all .15s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0d0d0d;
+      width: 100%;
+      justify-content: center;
+      font-size: 15px;
+      padding: 14px;
+    }
+
+    .btn-primary:hover { background: var(--accent-dim); }
+    .btn-primary:active { transform: scale(.98); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover { border-color: var(--text-muted); color: var(--text); }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--red);
+      border: 1px solid #3a1a1a;
+    }
+
+    .btn-danger:hover { background: #3a1a1a; }
+
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── STATUS MSG ── */
+    .status-msg {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .status-msg.error { background: #3a1a1a; color: var(--red); display: block; }
+    .status-msg.success { background: #0d2a1a; color: var(--green); display: block; }
+    .status-msg.loading { background: var(--surface2); color: var(--text-muted); display: block; }
+
+    /* ── MAIN SCREEN ── */
+    #main-screen {
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .header-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      color: var(--accent);
+      letter-spacing: 2px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-badge {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    main {
+      flex: 1;
+      padding: 28px 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* ── TOOLBAR ── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .toolbar-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 32px;
+      color: var(--text);
+      letter-spacing: 1px;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+
+    .stat-value {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 32px;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    /* ── TABLE ── */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    thead {
+      background: var(--surface2);
+    }
+
+    th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    tbody tr {
+      transition: background .15s;
+    }
+
+    tbody tr:hover { background: var(--surface2); }
+
+    .exercise-name {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(232,255,60,.1);
+      color: var(--accent);
+    }
+
+    .notes-cell {
+      color: var(--text-muted);
+      font-size: 13px;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .delete-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 6px;
+      transition: all .15s;
+      font-size: 16px;
+    }
+
+    .delete-btn:hover { color: var(--red); background: #3a1a1a; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .empty-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 24px;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.7);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      width: 100%;
+      max-width: 440px;
+      transform: translateY(20px);
+      transition: transform .2s;
+    }
+
+    .modal-overlay.open .modal {
+      transform: translateY(0);
+    }
+
+    .modal-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      margin-bottom: 24px;
+      color: var(--accent);
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .modal-grid .full { grid-column: 1 / -1; }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .modal-actions .btn { flex: 1; justify-content: center; }
+
+    /* ── CONFIRM MODAL ── */
+    #confirm-modal .modal { max-width: 360px; }
+    #confirm-modal .modal-title { color: var(--red); }
+    #confirm-text { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
+
+    /* ── LOADING OVERLAY ── */
+    #loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-text {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .toolbar { flex-direction: column; align-items: flex-start; }
+      th:nth-child(4), td:nth-child(4),
+      th:nth-child(6), td:nth-child(6) { display: none; }
+      main { padding: 16px; }
+      .auth-box { padding: 28px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Cargando...</div>
+</div>
+
+<!-- ══ AUTH SCREEN ══ -->
+<div id="auth-screen" class="screen">
+  <div class="auth-box">
+    <div class="auth-logo">Pesos Picados</div>
+    <div class="auth-subtitle">Tu tracker de entrenamiento</div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('login')">Iniciar sesión</button>
+      <button class="tab" onclick="switchTab('register')">Registrarse</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="login-form">
+      <div class="form-group">
+        <label>Correo</label>
+        <input type="email" id="login-email" placeholder="tu@correo.com" />
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="login-password" placeholder="••••••••" />
+      </div>
+      <button class="btn btn-primary" onclick="handleLogin()" id="login-btn">Entrar</button>
+      <div id="login-status" class="status-msg"></div>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="register-form" style="display:none">
+      <div class="form-group">
+        <label>Nombre</label>
+        <input type="text" id="reg-nombre" placeholder="Tu nombre" />
+      </div>
+      <div class="form-group">
+        <label>Correo</label>
+        <input type="email" id="reg-email" placeholder="tu@correo.com" />
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres" />
+      </div>
+      <div class="form-group">
+        <label>Confirmar contraseña</label>
+        <input type="password" id="reg-confirm" placeholder="Repetí la contraseña" />
+      </div>
+      <button class="btn btn-primary" onclick="handleRegister()" id="register-btn">Crear cuenta</button>
+      <div id="register-status" class="status-msg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MAIN SCREEN ══ -->
+<div id="main-screen" class="screen">
+  <header>
+    <div class="header-logo">Pesos Picados</div>
+    <div class="header-right">
+      <span class="user-badge" id="user-email-badge"></span>
+      <button class="btn btn-ghost" onclick="handleLogout()">Salir</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <div class="toolbar-title">Mis Ejercicios</div>
+      <div class="toolbar-actions">
+        <button class="btn btn-ghost" onclick="loadEjercicios()">↺ Actualizar</button>
+        <button class="btn btn-primary" onclick="openAddModal()">+ Agregar</button>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-total">0</div>
+        <div class="stat-label">Ejercicios</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-hoy">0</div>
+        <div class="stat-label">Hoy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-peso-max">0</div>
+        <div class="stat-label">Peso máx (kg)</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Ejercicio</th>
+            <th>Peso</th>
+            <th>Reps</th>
+            <th>Series</th>
+            <th>Fecha</th>
+            <th>Notas</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+      <div id="empty-state" class="empty-state" style="display:none">
+        <div class="empty-icon">🏋️</div>
+        <div class="empty-title">Sin ejercicios aún</div>
+        <p>Agregá tu primer ejercicio para empezar a trackear tu progreso.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ══ ADD EXERCISE MODAL ══ -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <div class="modal-title">Agregar Ejercicio</div>
+    <div class="modal-grid">
+      <div class="form-group full">
+        <label>Nombre del ejercicio</label>
+        <input type="text" id="add-nombre" placeholder="ej: Press de banca" />
+      </div>
+      <div class="form-group">
+        <label>Peso (kg)</label>
+        <input type="number" id="add-peso" placeholder="0" min="0" step="0.5" />
+      </div>
+      <div class="form-group">
+        <label>Repeticiones</label>
+        <input type="number" id="add-reps" placeholder="0" min="1" />
+      </div>
+      <div class="form-group">
+        <label>Series</label>
+        <input type="number" id="add-series" placeholder="0" min="1" />
+      </div>
+      <div class="form-group full">
+        <label>Notas (opcional)</label>
+        <textarea id="add-notas" placeholder="Observaciones, sensaciones..."></textarea>
+      </div>
+    </div>
+    <div id="add-status" class="status-msg"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeAddModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEjercicio()" id="save-btn">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CONFIRM DELETE MODAL ══ -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal">
+    <div class="modal-title">Eliminar</div>
+    <p id="confirm-text"></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FIREBASE ══ -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged,
+    updateProfile
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getDatabase,
+    ref,
+    push,
+    set,
+    get,
+    remove,
+    query,
+    orderByChild
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+  
+  const firebaseConfig = {
+    apiKey: "AIzaSyAXdzPgj2Lt6cTinI0gfIRx5aau2KuszYQ",
+    authDomain: "gymtrackerctt.firebaseapp.com",
+    databaseURL: "https://gymtrackerctt-default-rtdb.firebaseio.com/",
+    projectId: "gymtrackerctt",
+    storageBucket: "gymtrackerctt.appspot.com",
+    messagingSenderId: "823922129492",
+    appId: "1:823922129492:web:9231e9ab53b0fbaf718bc1"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+
+  let currentUser = null;
+  let pendingDeleteId = null;
+
+  // ── Auth state listener ──
+  onAuthStateChanged(auth, (user) => {
+    document.getElementById('loading-overlay').style.display = 'none';
+    if (user) {
+      currentUser = user;
+      document.getElementById('user-email-badge').textContent = user.email;
+      showScreen('main-screen');
+      loadEjercicios();
+    } else {
+      currentUser = null;
+      showScreen('auth-screen');
+    }
+  });
+
+  // ── Helpers ──
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function setStatus(elId, msg, type) {
+    const el = document.getElementById(elId);
+    el.textContent = msg;
+    el.className = `status-msg ${type}`;
+  }
+
+  function clearStatus(elId) {
+    const el = document.getElementById(elId);
+    el.className = 'status-msg';
+    el.textContent = '';
+  }
+
+  function today() {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  // ── Auth ──
+  window.switchTab = (tab) => {
+    document.querySelectorAll('.tab').forEach((t, i) => {
+      t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
+    });
+    document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+  };
+
+  window.handleLogin = async () => {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    if (!email || !password) return setStatus('login-status', 'Completá todos los campos', 'error');
+
+    const btn = document.getElementById('login-btn');
+    btn.disabled = true;
+    setStatus('login-status', 'Iniciando sesión...', 'loading');
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      clearStatus('login-status');
+    } catch (e) {
+      setStatus('login-status', 'Correo o contraseña incorrectos', 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  };
+
+  window.handleRegister = async () => {
+    const nombre = document.getElementById('reg-nombre').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value;
+    const confirm = document.getElementById('reg-confirm').value;
+
+    if (!nombre || !email || !password) return setStatus('register-status', 'Completá todos los campos', 'error');
+    if (password !== confirm) return setStatus('register-status', 'Las contraseñas no coinciden', 'error');
+    if (password.length < 6) return setStatus('register-status', 'Contraseña muy corta (mín 6)', 'error');
+
+    const btn = document.getElementById('register-btn');
+    btn.disabled = true;
+    setStatus('register-status', 'Creando cuenta...', 'loading');
+
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(cred.user, { displayName: nombre });
+      clearStatus('register-status');
+    } catch (e) {
+      const msg = e.code === 'auth/email-already-in-use' ? 'El correo ya está registrado' : 'Error al crear la cuenta';
+      setStatus('register-status', msg, 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  };
+
+  window.handleLogout = async () => {
+    await signOut(auth);
+  };
+
+  // ── Ejercicios ──
+  window.loadEjercicios = async () => {
+    if (!currentUser) return;
+    const tbody = document.getElementById('table-body');
+    const emptyState = document.getElementById('empty-state');
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:30px">Cargando...</td></tr>';
+
+    try {
+      const snap = await get(ref(db, `usuarios/${currentUser.uid}/ejercicios`));
+      tbody.innerHTML = '';
+
+      if (!snap.exists()) {
+        emptyState.style.display = 'block';
+        updateStats([]);
+        return;
+      }
+
+      const data = snap.val();
+      const ejercicios = Object.entries(data).map(([id, v]) => ({ id, ...v }));
+      ejercicios.sort((a, b) => b.fecha.localeCompare(a.fecha));
+
+      emptyState.style.display = 'none';
+      ejercicios.forEach(e => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span class="exercise-name">${e.nombre}</span></td>
+          <td><span class="badge">${e.peso} kg</span></td>
+          <td>${e.repeticiones}</td>
+          <td>${e.series}</td>
+          <td style="color:var(--text-muted);font-size:13px">${e.fecha}</td>
+          <td><div class="notes-cell" title="${e.notas || ''}">${e.notas || '—'}</div></td>
+          <td>
+            <button class="delete-btn" onclick="askDelete('${e.id}', '${e.nombre.replace(/'/g,"\\'")}')">✕</button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+
+      updateStats(ejercicios);
+    } catch (err) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--red);padding:30px">Error al cargar</td></tr>';
+    }
+  };
+
+  function updateStats(ejercicios) {
+    document.getElementById('stat-total').textContent = ejercicios.length;
+    const hoy = ejercicios.filter(e => e.fecha === today()).length;
+    document.getElementById('stat-hoy').textContent = hoy;
+    const maxPeso = ejercicios.length ? Math.max(...ejercicios.map(e => Number(e.peso))) : 0;
+    document.getElementById('stat-peso-max').textContent = maxPeso;
+  }
+
+  window.openAddModal = () => {
+    ['add-nombre','add-peso','add-reps','add-series','add-notas'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    clearStatus('add-status');
+    document.getElementById('add-modal').classList.add('open');
+    document.getElementById('add-nombre').focus();
+  };
+
+  window.closeAddModal = () => {
+    document.getElementById('add-modal').classList.remove('open');
+  };
+
+  window.saveEjercicio = async () => {
+    const nombre = document.getElementById('add-nombre').value.trim();
+    const peso = parseFloat(document.getElementById('add-peso').value);
+    const reps = parseInt(document.getElementById('add-reps').value);
+    const series = parseInt(document.getElementById('add-series').value);
+    const notas = document.getElementById('add-notas').value.trim();
+
+    if (!nombre) return setStatus('add-status', 'El nombre es obligatorio', 'error');
+    if (isNaN(peso) || isNaN(reps) || isNaN(series)) return setStatus('add-status', 'Revisá los números', 'error');
+
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    setStatus('add-status', 'Guardando...', 'loading');
+
+    try {
+      const newRef = push(ref(db, `usuarios/${currentUser.uid}/ejercicios`));
+      await set(newRef, { nombre, peso, repeticiones: reps, series, notas, fecha: today() });
+      closeAddModal();
+      loadEjercicios();
+    } catch (e) {
+      setStatus('add-status', 'Error al guardar', 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  };
+
+  window.askDelete = (id, nombre) => {
+    pendingDeleteId = id;
+    document.getElementById('confirm-text').textContent = `¿Eliminar "${nombre}"? Esta acción no se puede deshacer.`;
+    document.getElementById('confirm-modal').classList.add('open');
+  };
+
+  window.closeConfirm = () => {
+    pendingDeleteId = null;
+    document.getElementById('confirm-modal').classList.remove('open');
+  };
+
+  window.confirmDelete = async () => {
+    if (!pendingDeleteId) return;
+    try {
+      await remove(ref(db, `usuarios/${currentUser.uid}/ejercicios/${pendingDeleteId}`));
+    } finally {
+      closeConfirm();
+      loadEjercicios();
+    }
+  };
+
+  // Cerrar modales con click fuera
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.classList.remove('open');
+        pendingDeleteId = null;
+      }
+    });
+  });
+
+  // Enter en login
+  document.getElementById('login-password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') window.handleLogin();
+  });
+</script>
+</body>
+</html>
