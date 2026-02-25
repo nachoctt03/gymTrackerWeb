@@ -81,21 +81,6 @@
       </div>
     </div>
 
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-value" id="stat-total">0</div>
-        <div class="stat-label">Total ejercicios</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="stat-hoy">0</div>
-        <div class="stat-label">Hoy</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="stat-peso-max">0</div>
-        <div class="stat-label">Peso máximo (kg)</div>
-      </div>
-    </div>
-
     <div class="table-wrap">
       <table>
         <thead>
@@ -310,7 +295,6 @@
 
       if (!snap.exists()) {
         emptyState.style.display = 'block';
-        updateStats([]);
         return;
       }
 
@@ -332,17 +316,10 @@
         tbody.appendChild(tr);
       });
 
-      updateStats(ejercicios);
     } catch (err) {
       tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#cc0000;padding:30px">Error al cargar</td></tr>';
     }
   };
-
-  function updateStats(ejercicios) {
-    document.getElementById('stat-total').textContent = ejercicios.length;
-    document.getElementById('stat-hoy').textContent = ejercicios.filter(e => e.fecha === today()).length;
-    document.getElementById('stat-peso-max').textContent = ejercicios.length ? Math.max(...ejercicios.map(e => Number(e.peso))) : 0;
-  }
 
   window.openAddModal = () => {
     ['add-nombre','add-peso','add-reps','add-series','add-notas'].forEach(id => {
