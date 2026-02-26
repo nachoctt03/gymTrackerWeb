@@ -112,7 +112,22 @@
     <div class="modal-grid">
       <div class="form-group full">
         <label>Nombre del ejercicio</label>
-        <input type="text" id="add-nombre" placeholder="ej: Press de banca" />
+        <select id="add-nombre">
+          <option value="" disabled selected>Seleccioná un ejercicio</option>
+          <option>Press plano</option>
+          <option>Press inclinado</option>
+          <option>Sentadilla</option>
+          <option>Sillón de cuádriceps</option>
+          <option>Curl femoral (isquio)</option>
+          <option>Hack</option>
+          <option>Peso rumano</option>
+          <option>Bíceps (barra/mancuerna)</option>
+          <option>Tríceps (barra/mancuerna)</option>
+          <option>Jalón al pecho</option>
+          <option>Remo</option>
+          <option>Press militar</option>
+          <option>Vuelos laterales</option>
+        </select>
       </div>
       <div class="form-group">
         <label>Peso (kg)</label>
@@ -327,7 +342,6 @@
     });
     clearStatus('add-status');
     document.getElementById('add-modal').classList.add('open');
-    document.getElementById('add-nombre').focus();
   };
 
   window.closeAddModal = () => {

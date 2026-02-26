@@ -101,7 +101,7 @@ label {
   margin-bottom: 4px;
 }
 
-input, textarea {
+input, textarea, select {
   width: 100%;
   border: 1px solid #bbb;
   padding: 8px 10px;
@@ -112,7 +112,7 @@ input, textarea {
   outline: none;
 }
 
-input:focus, textarea:focus {
+input:focus, textarea:focus, select:focus {
   border-color: #555;
 }
 
