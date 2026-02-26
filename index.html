@@ -34,6 +34,11 @@
       </div>
       <button class="btn btn-full" onclick="handleLogin()" id="login-btn">Entrar</button>
       <div id="login-status" class="status-msg"></div>
+      <div class="divider"><span>o</span></div>
+      <button class="btn btn-google btn-full" onclick="handleGoogleLogin()" id="google-btn">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="18" height="18" />
+        Continuar con Google
+      </button>
     </div>
 
     <!-- REGISTRO -->
@@ -175,7 +180,9 @@
     signInWithEmailAndPassword,
     signOut,
     onAuthStateChanged,
-    updateProfile
+    updateProfile,
+    GoogleAuthProvider,
+    signInWithPopup
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
     getDatabase,
@@ -208,7 +215,7 @@
     document.getElementById('loading-overlay').style.display = 'none';
     if (user) {
       currentUser = user;
-      document.getElementById('user-email-badge').textContent = user.email;
+      document.getElementById('user-email-badge').textContent = user.displayName || user.email;
       showScreen('main-screen');
       loadEjercicios();
     } else {
@@ -295,6 +302,21 @@
 
   window.handleLogout = async () => {
     await signOut(auth);
+  };
+
+  window.handleGoogleLogin = async () => {
+    const btn = document.getElementById('google-btn');
+    btn.disabled = true;
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+    } catch (e) {
+      if (e.code !== 'auth/popup-closed-by-user') {
+        setStatus('login-status', 'Error al iniciar con Google', 'error');
+      }
+    } finally {
+      btn.disabled = false;
+    }
   };
 
   // ── Ejercicios ──
